@@ -1,0 +1,43 @@
+name: Read metadata from setup.cfg
+
+outputs:
+  package-name:
+    description: Package name
+    value: ${{ steps.package-name.outputs.text }}
+  python-version:
+    description: Python version
+    value: ${{ steps.python-version.outputs.text }}
+  package-version:
+    description: Package version
+    value: ${{ steps.package-version.outputs.text }}
+
+runs:
+  using: composite
+  steps:
+    - name: Get package name
+      id: package-name
+      uses: ./.github/actions/find-regex
+      with:
+        regex: ^name *= *\(.*\) *$
+        file: setup.cfg
+
+    - name: Get python version
+      id: python-version
+      uses: ./.github/actions/find-regex
+      with:
+        regex: ^python_requires = >=\(.*\)$
+        file: setup.cfg
+
+    - name: Get package version
+      id: package-version
+      uses: ./.github/actions/find-regex
+      with:
+        regex: ^__version__ = \"\(.*\)\" *$
+        file: ${{ steps.package-name.outputs.text }}/__init__.py
+        
+    - name: Metadata
+      run: |
+        echo package-name: ${{ steps.package-name.outputs.text }}
+        echo python-version: ${{ steps.python-version.outputs.text }}
+        echo package-version: ${{ steps.package-version.outputs.text }}
+      shell: bash
