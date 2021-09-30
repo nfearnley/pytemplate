@@ -7,6 +7,9 @@ outputs:
   python-version:
     description: Python version
     value: ${{ steps.python-version.outputs.text }}
+  package-path:
+    description: Package path
+    value: ${{ steps.package-path.outputs.text }}
   package-version:
     description: Package version
     value: ${{ steps.package-version.outputs.text }}
@@ -28,16 +31,32 @@ runs:
         regex: ^python_requires = >=\(.*\)$
         file: setup.cfg
 
+    - name: Get package path
+      id: package-path
+      env:
+        PACKAGE_NAME: ${{ steps.package-name.outputs.text }}
+      run: |
+        if [ -f "${PACKAGE_NAME}/__init__.py" ]; then
+          PACKAGE_PATH=${PACKAGE_NAME}/__init__.py
+        else
+          PACKAGE_PATH=${PACKAGE_NAME}.py
+        fi
+        echo "::set-output name=text::${PACKAGE_PATH}"
+      shell: bash
+
     - name: Get package version
       id: package-version
       uses: ./.github/actions/find-regex
+      env:
+        PACKAGE_PATH: ${{ steps.package-path.outputs.text }}
       with:
         regex: ^__version__ = \"\(.*\)\" *$
-        file: ${{ steps.package-name.outputs.text }}/__init__.py
+        file: ${{ env.PACKAGE_PATH }}
         
     - name: Metadata
       run: |
         echo package-name: ${{ steps.package-name.outputs.text }}
         echo python-version: ${{ steps.python-version.outputs.text }}
+        echo package-path: ${{ steps.package-path.outputs.text }}
         echo package-version: ${{ steps.package-version.outputs.text }}
       shell: bash

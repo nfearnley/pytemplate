@@ -1,8 +1,8 @@
 name: Append build number to version
 
 inputs:
-  package-name:
-    description: Package name
+  package-path:
+    description: Package path
     required: true
   package-version:
     description: Package version
@@ -13,12 +13,11 @@ runs:
   steps:
     - name: Append build number to version
       env:
-        PACKAGE_NAME: ${{ inputs.package-name }}
+        PACKAGE_PATH: ${{ inputs.package-path }}
         PACKAGE_VERSION: ${{ inputs.package-version }}
         RUN_NUMBER: ${{ github.run_number }}
       run: |
-        VERSION_FILE=${PACKAGE_NAME}/__init__.py
         OLD_VERSION=${PACKAGE_VERSION}
         NEW_VERSION=${OLD_VERSION}.post${RUN_NUMBER}
-        sed -i "s/^__version__ = \\\"${OLD_VERSION}\\\"$/__version__ = \\\"${NEW_VERSION}\\\"/" "${VERSION_FILE}"
+        sed -i "s/^__version__ = \\\"${OLD_VERSION}\\\"$/__version__ = \\\"${NEW_VERSION}\\\"/" "${PACKAGE_PATH}"
       shell: bash

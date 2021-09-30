@@ -14,14 +14,11 @@ jobs:
     - name: Read metadata
       id: metadata
       uses: ./.github/actions/metadata
-      
-    - name: Read debug
-      run: echo Package name ${{ steps.metadata.outputs.package-name }}
 
     - name: Append build number to version
       uses: ./.github/actions/append-buildnum
       with:
-        package-name: ${{ steps.metadata.outputs.package-name }}
+        package-path: ${{ steps.metadata.outputs.package-path }}
         package-version: ${{ steps.metadata.outputs.package-version }}
 
     - name: Set up Python ${{ steps.metadata.outputs.python-version }}
